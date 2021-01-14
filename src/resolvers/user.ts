@@ -1,8 +1,10 @@
 import { UserNamePasswordInput } from "../inputs/usernamePasswordInput";
 import { Arg, Ctx, Field, Mutation, ObjectType, Query, Resolver } from "type-graphql";
-import { MyContext } from "src/types";
+import { MyContext } from "../types";
 import { User } from "../entities/User";
 import argon2 from 'argon2';
+import { EntityManager } from '@mikro-orm/postgresql';
+import { COOKIE_NAME } from "../constants";
 
 @ObjectType()
 class FieldError {
@@ -27,7 +29,7 @@ export class UserResolver {
     @Query(() => User, { nullable: true })
     async me(
         @Ctx() { em,req } : MyContext
-    ) {
+    ) {       
         // tou are not  logged in
         if (!req.session.userId) {
             return null;
@@ -64,12 +66,20 @@ export class UserResolver {
             };
         }
         const hashedpassword = await argon2.hash(options.password);
-        const user = em.create(User, { username: options.username, password: hashedpassword});
+        let user;
         try {
-            await em.persistAndFlush(user);
+            const result = await (em as EntityManager).createQueryBuilder(User).getKnexQuery().insert(
+                {
+                    username: options.username,
+                    password: hashedpassword,
+                    created_at: new Date(),
+                    updated_at: new Date()
+                }
+            ).returning("*");
+            user = result[0];
         } catch (err) {
             ///duplicate username error
-            if (err.code === '23505' ) {//|| err.detail.includes('Already exists')) {
+            if (err.code === "23505") {
                 return {
                     errors:[{
                         field: 'username',
@@ -122,5 +132,20 @@ export class UserResolver {
         return {
             user,
         };
+    }
+
+    @Mutation(() => Boolean)
+    logout(@Ctx() {req, res }: MyContext){
+        return new Promise((resolve) => 
+            req.session.destroy((err) => {
+                res.clearCookie(COOKIE_NAME)
+            if (err) {
+                console.log(err);   
+                resolve(false)
+                return;
+            }
+
+            resolve(true)
+        }))
     }
 }
