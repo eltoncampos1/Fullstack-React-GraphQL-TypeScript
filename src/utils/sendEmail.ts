@@ -1,27 +1,33 @@
 import nodemailer from "nodemailer";
+import smtpTransport from 'nodemailer-smtp-transport';
+
 
 export async function sendEmail(to: string, html: string) {
 
-  let testAccount = await nodemailer.createTestAccount();
 
-  let transporter = nodemailer.createTransport({
-    host:testAccount.smtp.host,
-    port: testAccount.smtp.port,
-    secure: testAccount.smtp.secure, // true for 465, false for other ports
+  let transporter = nodemailer.createTransport(smtpTransport({
+    service: 'gmail',
+    host:'smtp.gmail.com',
     auth: {
-      user: testAccount.user, // generated ethereal user
-      pass: testAccount.pass, // generated ethereal password
+      user: 'eltoncampos36@gmail.com', // generated ethereal user
+      pass: 'ojcmqbaqtgfeiuda', // generated ethereal password
     },
-  });
+  }));
 
-  let info = await transporter.sendMail({
-    from: '"Fred Foo 👻" <foo@example.com>', // sender address
-    to, // list of receivers
-    subject: "Hello ✔", // Subject line
-    html, // html body
-  });
+  var mailOptions = {
+    from: 'eltoncampos36@gmail.com',
+    to,
+    subject: 'Sending Email using Node.js[nodemailer]',
+    html,
+  };
+  
+  transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+      console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+    }
+  });  
 
-  console.log("Message sent: %s", info.messageId);
-
-  console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
 }
