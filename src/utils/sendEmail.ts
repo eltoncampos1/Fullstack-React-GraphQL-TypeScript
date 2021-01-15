@@ -1,27 +1,27 @@
-"use strict";
 import nodemailer from "nodemailer";
 
 export async function sendEmail(to: string, html: string) {
 
-  // const testAccount = await nodemailer.createTestAccount();
+  let testAccount = await nodemailer.createTestAccount();
 
-  const transporter = nodemailer.createTransport({
-    host: "smtp.ethereal.email",
-    port: 587,
-    secure: false,
+  let transporter = nodemailer.createTransport({
+    host:testAccount.smtp.host,
+    port: testAccount.smtp.port,
+    secure: testAccount.smtp.secure, // true for 465, false for other ports
     auth: {
-      user: "mds43vi6nviwucqv@ethereal.email",
-      pass: "xJsQzVAuFYKqx5xUR9",
+      user: testAccount.user, // generated ethereal user
+      pass: testAccount.pass, // generated ethereal password
     },
   });
 
-  const info = await transporter.sendMail({
-    from: '"Fred Foo 👻" <foo@example.com>',
-    to,
-    subject: "Change password", 
-    html, 
+  let info = await transporter.sendMail({
+    from: '"Fred Foo 👻" <foo@example.com>', // sender address
+    to, // list of receivers
+    subject: "Hello ✔", // Subject line
+    html, // html body
   });
 
   console.log("Message sent: %s", info.messageId);
+
   console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
 }
