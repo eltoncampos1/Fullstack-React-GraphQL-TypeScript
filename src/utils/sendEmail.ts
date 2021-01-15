@@ -9,13 +9,13 @@ export async function sendEmail(to: string, html: string) {
     service: 'gmail',
     host:'smtp.gmail.com',
     auth: {
-      user: 'eltoncampos36@gmail.com', // generated ethereal user
-      pass: 'ojcmqbaqtgfeiuda', // generated ethereal password
+      user: 'myemail@email.com', // generated ethereal user
+      pass: 'minhasenhasecreta', // generated ethereal password
     },
   }));
 
   var mailOptions = {
-    from: 'eltoncampos36@gmail.com',
+    from: 'myemail@email.com',
     to,
     subject: 'Sending Email using Node.js[nodemailer]',
     html,
