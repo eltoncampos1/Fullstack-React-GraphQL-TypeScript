@@ -17,7 +17,7 @@ import { Post } from './entities/Post';
 import { User } from './entities/User';
 import path from 'path';
 
-//
+
 const main = async () => {
     const conn = await createConnection({
         type: 'postgres',
@@ -33,6 +33,7 @@ const main = async () => {
         port: 5438,
     });
     await conn.runMigrations();
+
 
     const app = express();
     const RedisStore = connectRedis(session)
